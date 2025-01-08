@@ -15,6 +15,9 @@ type Server struct {
 
 func NewServer(cfg *config.Config) *Server {
 	router := gin.Default()
+	//db := database.NewPostgresDB(cfg.DatabaseURL)
+	//userDb := database.NewUserDatabase(db)
+	//andomUserClient := service.NewRandomUserClient(cfg.RandomUserAPI)
 
 	return &Server{
 		config: cfg,
