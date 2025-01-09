@@ -13,26 +13,26 @@ type UserDatabaseInterface interface {
 }
 
 type UserDatabase struct {
-	db *PostgresDB
+	pg *PostgresDB
 }
 
 func NewUserDatabase(db *PostgresDB) UserDatabaseInterface {
-	return &UserDatabase{db: db}
+	return &UserDatabase{pg: db}
 }
 
 func (r *UserDatabase) Create(user *model.User) error {
-	return r.db.db.Create(user).Error
+	return r.pg.db.Create(user).Error
 }
 
 func (r *UserDatabase) GetByID(id uuid.UUID) (*model.User, error) {
 	var user model.User
-	err := r.db.db.First(&user, "id = ?", id).Error
+	err := r.pg.db.First(&user, "id = ?", id).Error
 	return &user, err
 }
 
 func (r *UserDatabase) List(limit int, nameFilter string) ([]model.User, error) {
 	var users []model.User
-	query := r.db.db
+	query := r.pg.db
 
 	err := query.Find(&users).Error
 	return users, err

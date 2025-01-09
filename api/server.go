@@ -6,6 +6,9 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"users-service/config"
+	"users-service/database"
+	"users-service/handler"
+	"users-service/service"
 )
 
 type Server struct {
@@ -15,9 +18,15 @@ type Server struct {
 
 func NewServer(cfg *config.Config) *Server {
 	router := gin.Default()
-	//db := database.NewPostgresDB(cfg.DatabaseURL)
-	//userDb := database.NewUserDatabase(db)
-	//andomUserClient := service.NewRandomUserClient(cfg.RandomUserAPI)
+	db := database.NewPostgresDB(cfg.DatabaseURL)
+	userDb := database.NewUserDatabase(db)
+	randomUserClient := service.NewRandomUserClient(cfg.RandomUserAPI)
+	userService := service.NewUserService(userDb.(*database.UserDatabase), randomUserClient)
+	handler := handler.NewUserHandler(userService)
+
+	router.POST("/user", handler.CreateUsers)
+	router.GET("/user/:id", handler.GetUser)
+	router.GET("/users", handler.ListUsers)
 
 	return &Server{
 		config: cfg,
