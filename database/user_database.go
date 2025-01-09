@@ -34,6 +34,15 @@ func (r *UserDatabase) List(limit int, nameFilter string) ([]model.User, error) 
 	var users []model.User
 	query := r.pg.db
 
+	if limit > 0 {
+		query = query.Limit(limit)
+	}
+
+	if nameFilter != "" {
+		query = query.Where("lower(first_name) ~ ? OR lower(last_name) ~ ?",
+			nameFilter, nameFilter)
+	}
+
 	err := query.Find(&users).Error
 	return users, err
 }
