@@ -32,6 +32,7 @@ COPY --from=builder /app/.env .
 ENV PORT=8080
 ENV DATABASE_URL="postgres://postgres:postgres@db:5432/userdb?sslmode=disable"
 ENV RANDOM_USER_API="https://randomuser.me/api/"
+ENV JAEGER_ENDPOINT="http://jaeger:14268/api/traces"
 
 # Expose port
 EXPOSE 8080
