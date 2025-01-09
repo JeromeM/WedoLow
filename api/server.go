@@ -18,16 +18,24 @@ type Server struct {
 }
 
 func NewServer(cfg *config.Config) *Server {
+	// Create a new Gin router
 	router := gin.Default()
+
+	// Initialize the database and services
 	db := database.NewPostgresDB(cfg.DatabaseURL)
 	userDb := database.NewUserDatabase(db)
+
+	// Initialize the RandomUser client
 	randomUserClient := service.NewRandomUserClient(cfg.RandomUserAPI)
+
+	// Initialize the user service and handler
 	userService := service.NewUserService(userDb.(*database.UserDatabase), randomUserClient)
 	handler := handler.NewUserHandler(userService)
 
 	// Add OpenTelemetry middleware
 	router.Use(otelgin.Middleware("WedoLow"))
 
+	// Define the routes
 	router.POST("/user", handler.CreateUsers)
 	router.GET("/user/:id", handler.GetUser)
 	router.GET("/users", handler.ListUsers)

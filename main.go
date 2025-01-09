@@ -46,12 +46,14 @@ func main() {
 	cfg := config.NewConfig()
 	server := api.NewServer(cfg)
 
+	// Initialize the tracer
 	tp, err := InitializeTracer(cfg.JaegerEndpoint)
 	if err != nil {
 		log.Fatalf("failed to initialize tracer: %v", err)
 	}
 	defer func() { _ = tp.Shutdown(context.Background()) }()
 
+	// Start the server
 	if err := server.Start(); err != nil {
 		log.Fatal(err)
 		os.Exit(1)

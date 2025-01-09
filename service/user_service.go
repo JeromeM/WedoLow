@@ -32,6 +32,7 @@ func NewUserService(db database.UserDatabaseInterface, randomUser RandomUserClie
 	}
 }
 
+// Validate the gender parameter from the request
 func ValidateGender(gender string) error {
 	switch gender {
 	case GenderMale, GenderFemale, GenderAny:
@@ -52,6 +53,7 @@ func (s *UserService) CreateUsers(ctx context.Context, count int, gender string)
 		return nil, fmt.Errorf("error with random users public api : %w", err)
 	}
 
+	// Create a new user for each result and insert it into the database
 	for _, result := range resp.Results {
 		user := &model.User{
 			ID:        uuid.New(),

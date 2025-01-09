@@ -18,7 +18,9 @@ func NewUserHandler(service *service.UserService) *UserHandler {
 	return &UserHandler{service: service}
 }
 
+// Handler for creating users
 func (h *UserHandler) CreateUsers(c *gin.Context) {
+	// Tracing
 	tracer := otel.Tracer("handler/CreateUser")
 	ctx, span := tracer.Start(c.Request.Context(), "CreateUserHandler")
 	defer span.End()
@@ -35,6 +37,7 @@ func (h *UserHandler) CreateUsers(c *gin.Context) {
 	c.JSON(http.StatusCreated, response)
 }
 
+// Handler for getting a user
 func (h *UserHandler) GetUser(c *gin.Context) {
 	tracer := otel.Tracer("handler/GetUser")
 	ctx, span := tracer.Start(c.Request.Context(), "GetUserHandler")
@@ -55,6 +58,7 @@ func (h *UserHandler) GetUser(c *gin.Context) {
 	c.JSON(http.StatusOK, user)
 }
 
+// Handler for listing users
 func (h *UserHandler) ListUsers(c *gin.Context) {
 	tracer := otel.Tracer("handler/ListUsers")
 	ctx, span := tracer.Start(c.Request.Context(), "ListUsersHandler")

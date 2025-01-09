@@ -26,6 +26,7 @@ func NewRandomUserClient(baseURL string) *RandomUserClient {
 	return &RandomUserClient{baseURL: baseURL}
 }
 
+// GetRandomUsers fetches random users from the RandomUser API
 func (c *RandomUserClient) GetRandomUsers(count int, gender string) (*RandomUserResponse, error) {
 	url := fmt.Sprintf("%s?results=%d", c.baseURL, count)
 	if gender != "any" {
