@@ -44,5 +44,6 @@ func (r *UserDatabase) List(limit int, nameFilter string) ([]model.User, error) 
 	}
 
 	err := query.Find(&users).Error
+
 	return users, err
 }

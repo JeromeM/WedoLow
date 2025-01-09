@@ -48,7 +48,7 @@ func (s *UserService) CreateUsers(count int, gender string) (*model.CreateUsersR
 
 	resp, err := s.randomUser.GetRandomUsers(count, gender)
 	if err != nil {
-		return nil, fmt.Errorf("Error with Random users public API : %w", err)
+		return nil, fmt.Errorf("error with random users public api : %w", err)
 	}
 
 	for _, result := range resp.Results {
