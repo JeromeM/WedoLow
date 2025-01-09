@@ -47,10 +47,11 @@ func (h *UserHandler) GetUser(c *gin.Context) {
 }
 
 func (h *UserHandler) ListUsers(c *gin.Context) {
-	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "0"))
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "10"))
 	nameFilter := c.DefaultQuery("name", "")
 
-	users, err := h.service.ListUsers(limit, nameFilter)
+	users, err := h.service.ListUsers(page, limit, nameFilter)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

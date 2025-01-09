@@ -9,7 +9,7 @@ import (
 type UserDatabaseInterface interface {
 	Create(user *model.User) error
 	GetByID(id uuid.UUID) (*model.User, error)
-	List(limit int, nameFilter string) ([]model.User, error)
+	List(offset int, limit int, nameFilter string) ([]model.User, error)
 }
 
 type UserDatabase struct {
@@ -30,20 +30,26 @@ func (r *UserDatabase) GetByID(id uuid.UUID) (*model.User, error) {
 	return &user, err
 }
 
-func (r *UserDatabase) List(limit int, nameFilter string) ([]model.User, error) {
+func (r *UserDatabase) List(page int, limit int, nameFilter string) ([]model.User, error) {
 	var users []model.User
 	query := r.pg.db
 
-	if limit > 0 {
-		query = query.Limit(limit)
+	if page == 0 {
+		page = 1
 	}
+	offset := (page - 1) * limit
 
 	if nameFilter != "" {
 		query = query.Where("lower(first_name) ~ ? OR lower(last_name) ~ ?",
 			nameFilter, nameFilter)
 	}
 
-	err := query.Find(&users).Error
+	if limit == 0 {
+		err := query.Offset(offset).Find(&users).Error
+		return users, err
+	} else {
+		err := query.Offset(offset).Limit(limit).Find(&users).Error
+		return users, err
+	}
 
-	return users, err
 }

@@ -78,6 +78,6 @@ func (s *UserService) GetUser(id uuid.UUID) (*model.User, error) {
 	return s.db.GetByID(id)
 }
 
-func (s *UserService) ListUsers(limit int, nameFilter string) ([]model.User, error) {
-	return s.db.List(limit, nameFilter)
+func (s *UserService) ListUsers(page int, limit int, nameFilter string) ([]model.User, error) {
+	return s.db.List(page, limit, nameFilter)
 }

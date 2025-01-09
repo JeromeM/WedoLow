@@ -1,6 +1,7 @@
 package service
 
 import (
+	"sort"
 	"testing"
 	"time"
 
@@ -33,16 +34,28 @@ func (m *mockDatabase) GetByID(id uuid.UUID) (*model.User, error) {
 	return nil, nil
 }
 
-func (m *mockDatabase) List(limit int, nameFilter string) ([]model.User, error) {
+func (m *mockDatabase) List(page int, limit int, nameFilter string) ([]model.User, error) {
 	var users []model.User
 	for _, user := range m.users {
 		if nameFilter == "" || user.FirstName == nameFilter || user.LastName == nameFilter {
 			users = append(users, *user)
 		}
 	}
-	if limit > 0 && len(users) > limit {
-		users = users[:limit]
+
+	// Sort by creation date for consistent pagination
+	sort.Slice(users, func(i, j int) bool {
+		return users[i].CreatedAt.Before(users[j].CreatedAt)
+	})
+
+	offset := (page - 1) * limit
+	if limit > 0 && offset < len(users) {
+		end := offset + limit
+		if end > len(users) {
+			end = len(users)
+		}
+		users = users[offset:end]
 	}
+
 	return users, nil
 }
 
@@ -261,14 +274,35 @@ func TestUserService_ListUsers(t *testing.T) {
 	}
 
 	t.Run("List all users", func(t *testing.T) {
-		users, err := service.ListUsers(0, "")
+		users, err := service.ListUsers(0, 0, "")
 		assert.NoError(t, err)
 		assert.Len(t, users, len(testUsers))
 	})
 
 	t.Run("List with limit", func(t *testing.T) {
-		users, err := service.ListUsers(2, "")
+		users, err := service.ListUsers(1, 2, "")
 		assert.NoError(t, err)
 		assert.Len(t, users, 2)
+	})
+
+	t.Run("List with pagination", func(t *testing.T) {
+		users, err := service.ListUsers(2, 1, "")
+		assert.NoError(t, err)
+		assert.Len(t, users, 1)
+		assert.Equal(t, "Bob", users[0].FirstName)
+	})
+
+	t.Run("List with name filter", func(t *testing.T) {
+		users, err := service.ListUsers(0, 0, "Charlie")
+		assert.NoError(t, err)
+		assert.Len(t, users, 1)
+		assert.Equal(t, "Charlie", users[0].FirstName)
+	})
+
+	t.Run("List with name filter and limit", func(t *testing.T) {
+		users, err := service.ListUsers(1, 2, "Bob")
+		assert.NoError(t, err)
+		assert.Len(t, users, 1)
+		assert.Equal(t, "Bob", users[0].FirstName)
 	})
 }
