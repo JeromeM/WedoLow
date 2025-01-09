@@ -5,16 +5,18 @@ import (
 )
 
 type Config struct {
-	Port          string
-	DatabaseURL   string
-	RandomUserAPI string
+	Port           string
+	DatabaseURL    string
+	RandomUserAPI  string
+	JaegerEndpoint string
 }
 
 func NewConfig() *Config {
 	return &Config{
-		Port:          getEnvOrDefault("PORT", "8080"),
-		DatabaseURL:   getEnvOrDefault("DATABASE_URL", "postgres://postgres:postgres@localhost:5432/userdb?sslmode=disable"),
-		RandomUserAPI: getEnvOrDefault("RANDOM_USER_API", "https://randomuser.me/api/"),
+		Port:           getEnvOrDefault("PORT", "8080"),
+		DatabaseURL:    getEnvOrDefault("DATABASE_URL", "postgres://postgres:postgres@localhost:5432/userdb?sslmode=disable"),
+		RandomUserAPI:  getEnvOrDefault("RANDOM_USER_API", "https://randomuser.me/api/"),
+		JaegerEndpoint: getEnvOrDefault("JAEGER_ENDPOINT", "http://jaeger:14268/api/traces"),
 	}
 }
 

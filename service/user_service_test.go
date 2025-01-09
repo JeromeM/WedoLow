@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"sort"
 	"testing"
 	"time"
@@ -22,19 +23,19 @@ func newMockDatabase() database.UserDatabaseInterface {
 	}
 }
 
-func (m *mockDatabase) Create(user *model.User) error {
+func (m *mockDatabase) Create(ctx context.Context, user *model.User) error {
 	m.users[user.ID] = user
 	return nil
 }
 
-func (m *mockDatabase) GetByID(id uuid.UUID) (*model.User, error) {
+func (m *mockDatabase) GetByID(ctx context.Context, id uuid.UUID) (*model.User, error) {
 	if user, exists := m.users[id]; exists {
 		return user, nil
 	}
 	return nil, nil
 }
 
-func (m *mockDatabase) List(page int, limit int, nameFilter string) ([]model.User, error) {
+func (m *mockDatabase) List(ctx context.Context, page int, limit int, nameFilter string) ([]model.User, error) {
 	var users []model.User
 	for _, user := range m.users {
 		if nameFilter == "" || user.FirstName == nameFilter || user.LastName == nameFilter {
@@ -205,7 +206,7 @@ func TestUserService_CreateUsers(t *testing.T) {
 			tt.setup(mockClient)
 
 			service := NewUserService(newMockDatabase(), mockClient)
-			response, err := service.CreateUsers(tt.count, tt.gender)
+			response, err := service.CreateUsers(nil, tt.count, tt.gender)
 
 			if tt.wantErr {
 				assert.Error(t, err)
@@ -232,10 +233,10 @@ func TestUserService_GetUser(t *testing.T) {
 		Phone:     "123-456-7890",
 		CreatedAt: time.Now(),
 	}
-	db.Create(testUser)
+	db.Create(nil, testUser)
 
 	t.Run("Get existing user", func(t *testing.T) {
-		user, err := service.GetUser(testUser.ID)
+		user, err := service.GetUser(nil, testUser.ID)
 		assert.NoError(t, err)
 		assert.NotNil(t, user)
 		assert.Equal(t, testUser.ID, user.ID)
@@ -243,7 +244,7 @@ func TestUserService_GetUser(t *testing.T) {
 	})
 
 	t.Run("Get non-existent user", func(t *testing.T) {
-		user, err := service.GetUser(uuid.New())
+		user, err := service.GetUser(nil, uuid.New())
 		assert.NoError(t, err)
 		assert.Nil(t, user)
 	})
@@ -270,37 +271,37 @@ func TestUserService_ListUsers(t *testing.T) {
 			LastName:  u.lastName,
 			CreatedAt: time.Now(),
 		}
-		db.Create(user)
+		db.Create(nil, user)
 	}
 
 	t.Run("List all users", func(t *testing.T) {
-		users, err := service.ListUsers(0, 0, "")
+		users, err := service.ListUsers(nil, 0, 0, "")
 		assert.NoError(t, err)
 		assert.Len(t, users, len(testUsers))
 	})
 
 	t.Run("List with limit", func(t *testing.T) {
-		users, err := service.ListUsers(1, 2, "")
+		users, err := service.ListUsers(nil, 1, 2, "")
 		assert.NoError(t, err)
 		assert.Len(t, users, 2)
 	})
 
 	t.Run("List with pagination", func(t *testing.T) {
-		users, err := service.ListUsers(2, 1, "")
+		users, err := service.ListUsers(nil, 2, 1, "")
 		assert.NoError(t, err)
 		assert.Len(t, users, 1)
 		assert.Equal(t, "Bob", users[0].FirstName)
 	})
 
 	t.Run("List with name filter", func(t *testing.T) {
-		users, err := service.ListUsers(0, 0, "Charlie")
+		users, err := service.ListUsers(nil, 0, 0, "Charlie")
 		assert.NoError(t, err)
 		assert.Len(t, users, 1)
 		assert.Equal(t, "Charlie", users[0].FirstName)
 	})
 
 	t.Run("List with name filter and limit", func(t *testing.T) {
-		users, err := service.ListUsers(1, 2, "Bob")
+		users, err := service.ListUsers(nil, 1, 2, "Bob")
 		assert.NoError(t, err)
 		assert.Len(t, users, 1)
 		assert.Equal(t, "Bob", users[0].FirstName)

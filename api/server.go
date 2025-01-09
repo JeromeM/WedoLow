@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/gin-gonic/gin"
+	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
 
 	"users-service/config"
 	"users-service/database"
@@ -23,6 +24,9 @@ func NewServer(cfg *config.Config) *Server {
 	randomUserClient := service.NewRandomUserClient(cfg.RandomUserAPI)
 	userService := service.NewUserService(userDb.(*database.UserDatabase), randomUserClient)
 	handler := handler.NewUserHandler(userService)
+
+	// Add OpenTelemetry middleware
+	router.Use(otelgin.Middleware("WedoLow"))
 
 	router.POST("/user", handler.CreateUsers)
 	router.GET("/user/:id", handler.GetUser)

@@ -1,15 +1,16 @@
 package database
 
 import (
+	"context"
 	"users-service/model"
 
 	"github.com/google/uuid"
 )
 
 type UserDatabaseInterface interface {
-	Create(user *model.User) error
-	GetByID(id uuid.UUID) (*model.User, error)
-	List(page int, limit int, nameFilter string) ([]model.User, error)
+	Create(ctx context.Context, user *model.User) error
+	GetByID(ctx context.Context, id uuid.UUID) (*model.User, error)
+	List(ctx context.Context, page int, limit int, nameFilter string) ([]model.User, error)
 }
 
 type UserDatabase struct {
@@ -20,17 +21,17 @@ func NewUserDatabase(db *PostgresDB) UserDatabaseInterface {
 	return &UserDatabase{pg: db}
 }
 
-func (r *UserDatabase) Create(user *model.User) error {
-	return r.pg.db.Create(user).Error
+func (r *UserDatabase) Create(ctx context.Context, user *model.User) error {
+	return r.pg.db.WithContext(ctx).Create(user).Error
 }
 
-func (r *UserDatabase) GetByID(id uuid.UUID) (*model.User, error) {
+func (r *UserDatabase) GetByID(ctx context.Context, id uuid.UUID) (*model.User, error) {
 	var user model.User
-	err := r.pg.db.First(&user, "id = ?", id).Error
+	err := r.pg.db.WithContext(ctx).First(&user, "id = ?", id).Error
 	return &user, err
 }
 
-func (r *UserDatabase) List(page int, limit int, nameFilter string) ([]model.User, error) {
+func (r *UserDatabase) List(ctx context.Context, page int, limit int, nameFilter string) ([]model.User, error) {
 	var users []model.User
 	query := r.pg.db
 
@@ -45,10 +46,10 @@ func (r *UserDatabase) List(page int, limit int, nameFilter string) ([]model.Use
 	}
 
 	if limit == 0 {
-		err := query.Offset(offset).Find(&users).Error
+		err := query.WithContext(ctx).Offset(offset).Find(&users).Error
 		return users, err
 	} else {
-		err := query.Offset(offset).Limit(limit).Find(&users).Error
+		err := query.WithContext(ctx).Offset(offset).Limit(limit).Find(&users).Error
 		return users, err
 	}
 

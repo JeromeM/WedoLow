@@ -7,8 +7,10 @@ services:
       - .env
     environment:
       - DATABASE_URL=postgres://postgres:postgres@db:5432/userdb?sslmode=disable
+      - JAEGER_ENDPOINT=http://jaeger:14268/api/traces
     depends_on:
       - db
+      - jaeger
     networks:
       - user-network
 
@@ -22,6 +24,14 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - user-network
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.46
+    ports:
+      - "16686:16686" # Jaeger UI
+      - "14268:14268" # Traces collector
     networks:
       - user-network
 

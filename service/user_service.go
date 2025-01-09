@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"fmt"
 	"time"
 	"users-service/database"
@@ -40,7 +41,7 @@ func ValidateGender(gender string) error {
 	}
 }
 
-func (s *UserService) CreateUsers(count int, gender string) (*model.CreateUsersResponse, error) {
+func (s *UserService) CreateUsers(ctx context.Context, count int, gender string) (*model.CreateUsersResponse, error) {
 
 	if err := ValidateGender(gender); err != nil {
 		return nil, err
@@ -61,7 +62,7 @@ func (s *UserService) CreateUsers(count int, gender string) (*model.CreateUsersR
 			Phone:     result.Phone,
 			CreatedAt: time.Now(),
 		}
-		if err := s.db.Create(user); err != nil {
+		if err := s.db.Create(ctx, user); err != nil {
 			return nil, fmt.Errorf("erreur lors de la création de l'utilisateur : %w", err)
 		}
 	}
@@ -74,10 +75,10 @@ func (s *UserService) CreateUsers(count int, gender string) (*model.CreateUsersR
 	return response, nil
 }
 
-func (s *UserService) GetUser(id uuid.UUID) (*model.User, error) {
-	return s.db.GetByID(id)
+func (s *UserService) GetUser(ctx context.Context, id uuid.UUID) (*model.User, error) {
+	return s.db.GetByID(ctx, id)
 }
 
-func (s *UserService) ListUsers(page int, limit int, nameFilter string) ([]model.User, error) {
-	return s.db.List(page, limit, nameFilter)
+func (s *UserService) ListUsers(ctx context.Context, page int, limit int, nameFilter string) ([]model.User, error) {
+	return s.db.List(ctx, page, limit, nameFilter)
 }
