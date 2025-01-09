@@ -21,12 +21,13 @@ func (h *UserHandler) CreateUsers(c *gin.Context) {
 	count, _ := strconv.Atoi(c.DefaultQuery("count", "1"))
 	gender := c.DefaultQuery("gender", "any")
 
-	if err := h.service.CreateUsers(count, gender); err != nil {
+	response, err := h.service.CreateUsers(count, gender)
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.Status(http.StatusCreated)
+	c.JSON(http.StatusCreated, response)
 }
 
 func (h *UserHandler) GetUser(c *gin.Context) {
