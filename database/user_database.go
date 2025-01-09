@@ -9,7 +9,7 @@ import (
 type UserDatabaseInterface interface {
 	Create(user *model.User) error
 	GetByID(id uuid.UUID) (*model.User, error)
-	List(offset int, limit int, nameFilter string) ([]model.User, error)
+	List(page int, limit int, nameFilter string) ([]model.User, error)
 }
 
 type UserDatabase struct {
